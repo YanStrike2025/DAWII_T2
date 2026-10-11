@@ -3,6 +3,7 @@ package com.cibertec.msresolucion.dto;
 import java.time.LocalDateTime;
 
 public record ReclamoResponse(
+
 		Long numreclamo,
 		LocalDateTime fechareclamo,
 		String nomcliente,

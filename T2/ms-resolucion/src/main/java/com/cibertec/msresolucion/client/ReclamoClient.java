@@ -16,6 +16,7 @@ public interface ReclamoClient {
 
 	@PutMapping("/reclamos/{numreclamo}")
 	ReclamoResponse updateReclamo(
+
 			@PathVariable("numreclamo") Long numreclamo,
 			@RequestBody ReclamoActualizarRequest request
 	);

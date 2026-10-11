@@ -17,9 +17,9 @@ public class ResolucionService {
 	private static final int ESTADO_IMPROCEDENTE = 3;
 
 	private static final String OBSERVACION_PROCEDENTE =
-			"Reclamo procedente: se reconoce el consumo desconocido y se procede con la devolucion";
+			"Reclamo procedente: se reconoce el consumo desconocido y se procede con la devolucion ";
 	private static final String OBSERVACION_IMPROCEDENTE =
-			"Reclamo improcedente: el consumo fue validado como realizado por el titular";
+			"Reclamo improcedente: el consumo fue validado como realizado por el titular ";
 
 	private final ReclamoClient reclamoClient;
 
@@ -46,7 +46,7 @@ public class ResolucionService {
 	) {
 		if (request == null || request.analista() == null || request.analista().isBlank()) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-					"El nombre del analista es obligatorio");
+					"El Nombre del analista es OBLIGATORIO");
 		}
 
 		obtenerReclamo(numreclamo);
@@ -62,7 +62,7 @@ public class ResolucionService {
 			return reclamoClient.getReclamoByNumero(numreclamo);
 		} catch (FeignException.NotFound e) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-					"El reclamo " + numreclamo + " no existe. No se realizo la resolucion");
+					"El reclamo " + numreclamo + " NO existe. No se realizo la resolucion");
 		} catch (FeignException e) {
 			throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "ms-reclamos no disponible");
 		}
@@ -71,6 +71,7 @@ public class ResolucionService {
 	private ReclamoResponse actualizarReclamo(Long numreclamo, ReclamoActualizarRequest request) {
 		try {
 			return reclamoClient.updateReclamo(numreclamo, request);
+
 		} catch (FeignException e) {
 			throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,
 					"No se pudo actualizar el reclamo " + numreclamo + " en ms-reclamos");
