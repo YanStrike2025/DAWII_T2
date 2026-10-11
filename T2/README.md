@@ -1,5 +1,6 @@
 # PAGOYA PERU - DAWII T2
 GRUPO 7 - Desarrollo de Aplicaciones Web II
+T2
 
 docker compose -f docker-compose-mysql.yml up -d
 
