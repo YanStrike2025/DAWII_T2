@@ -1,0 +1,232 @@
+{
+  "info": {
+    "_postman_id": "5c2a7e10-3b8d-4f1a-9c64-2d7e8f90a1b3",
+    "name": "PAGOYA PERU - T2 (Eureka / Reclamos / Resolucion)",
+    "description": "Pregunta 2: ms-reclamos (registro, consulta, actualizacion).\nPregunta 3: ms-resolucion (OpenFeign -> ms-reclamos via Eureka).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "reclamosBaseUrl", "value": "http://localhost:8081" },
+    { "key": "resolucionBaseUrl", "value": "http://localhost:8082" },
+    { "key": "numreclamo", "value": "1" }
+  ],
+  "item": [
+    {
+      "name": "Pregunta 2 - ms-reclamos",
+      "item": [
+        {
+          "name": "Registrar reclamo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Reclamo registrado con valores por defecto\", function () {",
+                  "  pm.response.to.have.status(201);",
+                  "  var r = pm.response.json();",
+                  "  pm.expect(r.analista).to.eql(\"No asignado\");",
+                  "  pm.expect(r.estado).to.eql(1);",
+                  "  pm.expect(r.observacion).to.eql(\"por evaluar\");",
+                  "  pm.collectionVariables.set(\"numreclamo\", r.numreclamo);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nomcliente\": \"Rosa Quispe\",\n  \"ultimos4tarjeta\": \"1234\",\n  \"motivo\": \"Consumo desconocido en tienda online\"\n}"
+            },
+            "url": {
+              "raw": "{{reclamosBaseUrl}}/reclamos",
+              "host": ["{{reclamosBaseUrl}}"],
+              "path": ["reclamos"]
+            }
+          }
+        },
+        {
+          "name": "Consultar reclamo por numero",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Reclamo encontrado\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "  pm.expect(pm.response.json().numreclamo).to.eql(parseInt(pm.collectionVariables.get(\"numreclamo\")));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{reclamosBaseUrl}}/reclamos/{{numreclamo}}",
+              "host": ["{{reclamosBaseUrl}}"],
+              "path": ["reclamos", "{{numreclamo}}"]
+            }
+          }
+        },
+        {
+          "name": "Actualizar reclamo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Reclamo actualizado\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "  pm.expect(pm.response.json().analista).to.eql(\"Carlos Ramos\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estado\": 1,\n  \"analista\": \"Carlos Ramos\",\n  \"observacion\": \"en revision por el analista\"\n}"
+            },
+            "url": {
+              "raw": "{{reclamosBaseUrl}}/reclamos/{{numreclamo}}",
+              "host": ["{{reclamosBaseUrl}}"],
+              "path": ["reclamos", "{{numreclamo}}"]
+            }
+          }
+        },
+        {
+          "name": "Consultar reclamo inexistente (404)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 404\", function () {",
+                  "  pm.response.to.have.status(404);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{reclamosBaseUrl}}/reclamos/9999",
+              "host": ["{{reclamosBaseUrl}}"],
+              "path": ["reclamos", "9999"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Pregunta 3 - ms-resolucion",
+      "item": [
+        {
+          "name": "Resolver reclamo PROCEDENTE (estado 2)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Reclamo procedente\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "  var r = pm.response.json();",
+                  "  pm.expect(r.reclamo.estado).to.eql(2);",
+                  "  pm.expect(r.reclamo.analista).to.eql(\"Carlos Ramos\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"analista\": \"Carlos Ramos\"\n}"
+            },
+            "url": {
+              "raw": "{{resolucionBaseUrl}}/resoluciones/{{numreclamo}}/procedente",
+              "host": ["{{resolucionBaseUrl}}"],
+              "path": ["resoluciones", "{{numreclamo}}", "procedente"]
+            }
+          }
+        },
+        {
+          "name": "Resolver reclamo IMPROCEDENTE (estado 3)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Reclamo improcedente\", function () {",
+                  "  pm.response.to.have.status(200);",
+                  "  var r = pm.response.json();",
+                  "  pm.expect(r.reclamo.estado).to.eql(3);",
+                  "  pm.expect(r.reclamo.analista).to.eql(\"Lucia Torres\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"analista\": \"Lucia Torres\"\n}"
+            },
+            "url": {
+              "raw": "{{resolucionBaseUrl}}/resoluciones/{{numreclamo}}/improcedente",
+              "host": ["{{resolucionBaseUrl}}"],
+              "path": ["resoluciones", "{{numreclamo}}", "improcedente"]
+            }
+          }
+        },
+        {
+          "name": "Resolver reclamo inexistente (404)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 404 con mensaje de error\", function () {",
+                  "  pm.response.to.have.status(404);",
+                  "  pm.expect(pm.response.json().message).to.include(\"no existe\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"analista\": \"Carlos Ramos\"\n}"
+            },
+            "url": {
+              "raw": "{{resolucionBaseUrl}}/resoluciones/9999/procedente",
+              "host": ["{{resolucionBaseUrl}}"],
+              "path": ["resoluciones", "9999", "procedente"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
